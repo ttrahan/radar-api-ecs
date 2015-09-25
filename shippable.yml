@@ -1,0 +1,32 @@
+# language setting
+language: node_js
+
+# version numbers, testing against one version of node
+node_js:
+    - 0.10.33
+
+env:
+    global:
+        - XUNIT_FILE=./shippable/testresults/result.xml
+        - secure: DxW/pzF8wG19woTQMT+4ae7idwDaVoobf0W3j+Gv1sudoV8+Js5Q9v+gi3IkCuroX/e6kyw8KcFipw7DG0uTbPkHc7LP8dRs87Wrg2Ln7O/eE2RPhKb+3HzKQ2eoPu80j/sfZx2FEGpvUXEHuQL28sb2ChfQMXwXf6SPhjO00oeBE+76RCBQPwC1Ho7i8493lKodWx2O76DeY/yJST1M1t5SJykHCjKuWLmqfoZLVmvT5F0OGSGLtZCgfX9QSJc4nIiOOSPWJ+XIV68KFcHvDMFd+BCprU9w7ic8kFh7sft8S0hh8aYHh1W0OQsnvmsFiODQf75ELtcx82O88zRwCQ==
+        # This secure variable is an encypted GitHub token for the subscription triggering the build.
+        # You'll need to replace the above hash with one based on your own personal access token from your GitHub account settings.
+        # For instructions to encrypt this variable, see http://docs.shippable.com/project_settings/#encrypt-environment-variables
+
+
+before_install:
+#    - cd $SHIPPABLE_REPO_DIR
+    - node --version
+    - npm install -g grunt-cli
+    - mkdir -p ./shippable/testresults
+    - mkdir -p ./shippable/codecoverage
+
+script:
+    - mkdir -p ./shippable/buildoutput
+    - touch ./shippable/buildoutput/config.txt
+    - echo $BUILD_NUMBER > ./shippable/buildoutput/config.txt
+    - grunt
+
+after_script:
+    - ./node_modules/.bin/istanbul cover grunt -- -u tdd
+    - ./node_modules/.bin/istanbul report cobertura --dir  ./shippable/codecoverage/
